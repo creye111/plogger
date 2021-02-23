@@ -97,6 +97,15 @@ public class PPLoggerMain extends  Application{
 				}
 			}
 		});
+		closeWindow.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				primaryStage.close();
+				
+			}
+			
+		});
 		Rectangle bigBlue = new Rectangle(xDim/3.0, 3.0*yDim/4.0, Color.BLACK);
 		root.setLeft(bigBlue);
 		Rectangle rightBlue = new Rectangle(xDim/3.0,3.0*yDim/4.0, Color.BLACK);
