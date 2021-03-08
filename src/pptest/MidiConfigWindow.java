@@ -36,8 +36,14 @@ import javax.sound.midi.Synthesizer;
 public class MidiConfigWindow{
 	private Stage midiConfigStage;
 	private Scene midiConfigScene;
+	private boolean isTesting=false;
 	private static boolean midiStageShow = false;
-	TableView <InfoWrapper> midiDeviceTable;
+	private TableView <InfoWrapper> midiDeviceTable;
+	private  Transmitter selectedTransmitter;
+	private Receiver ioMidiRec;
+	private InfoWrapper selectedItem;
+	private MidiDevice selectedDevice;
+	
 	public MidiConfigWindow() {
 		// TODO Auto-generated constructor stub
 		midiConfigStage = new Stage();
@@ -54,6 +60,11 @@ public class MidiConfigWindow{
 				if(getMConfigShow()) {
 					midiStageShow=false;
 				}
+				if (selectedDevice != null) {
+					if(selectedDevice.isOpen()) {
+						selectedDevice.close();
+					}
+				}
 			};
 		});
 		
@@ -65,11 +76,7 @@ public class MidiConfigWindow{
 		
 		HBox buttonBox1 = new HBox();
 		Button cancelButton = new Button("Cancel");
-		cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent arg0) {
-				midiConfigStage.close();
-			};
-		});
+		
 		buttonBox1.getChildren().add(cancelButton);
 		Button saveButton = new Button("Save");
 		buttonBox1.getChildren().add(saveButton);
@@ -80,6 +87,7 @@ public class MidiConfigWindow{
 		HBox buttonBox2 = new HBox();
 		buttonBox2.setAlignment(Pos.TOP_RIGHT);
 		Button testButton = new Button("Test Selection...");
+		
 		buttonBox2.getChildren().add(testButton);
 		
 		
@@ -109,26 +117,31 @@ public class MidiConfigWindow{
 
 			@Override
 			public void handle(ActionEvent arg0) {
-				InfoWrapper selectedItem = midiDeviceTable.getSelectionModel().getSelectedItem();
+				setSelectedItem(midiDeviceTable.getSelectionModel().getSelectedItem());
 				Info [] mList = MidiSystem.getMidiDeviceInfo();
 				for(Info i : mList) {
-					if(i.getName()==selectedItem.getMName()) {
+					if(i.getName()==getSelectedItem().getMName()&&i.hashCode()==getSelectedItem().getMHash()) {
 						System.out.println("FOUND");
-						System.out.println("D/testButton Press: "+selectedItem.getMName());
+						System.out.println("D/testButton Press: "+getSelectedItem().getMName()+"HASH: "+getSelectedItem().getMHash());
 						try {
-							MidiDevice selectedDevice = MidiSystem.getMidiDevice(i);
-							selectedDevice.open();
-							System.out.println("D/MidiConfigWindow: "+selectedDevice.isOpen());
-							
-							System.out.println("D/MidiConfigWindow: "+selectedDevice.isOpen());
-											
-							Transmitter t = selectedDevice.getTransmitter();
-							Receiver r = new PracticeReceiver();
-							t.setReceiver(r);
-							
-							
-							//System.out.println(r.toString());
-							selectedDevice.close();
+							setSelectedDevice(MidiSystem.getMidiDevice(i));
+							if(!isTesting()) {
+								
+								getSelectedDevice().open();
+								System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
+								selectedTransmitter = getSelectedDevice().getTransmitter();
+								ioMidiRec = new PracticeReceiver();
+								selectedTransmitter.setReceiver(ioMidiRec);
+								
+								setTesting(true);
+							}
+							else {
+								
+								getSelectedDevice().close();
+								System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
+								setTesting(false);
+							}
+								
 						}
 						catch(Exception e){
 							e.printStackTrace();
@@ -140,6 +153,18 @@ public class MidiConfigWindow{
 			
 		});
 		
+		saveButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				try {
+					
+				}catch(Exception e) {
+					
+				}
+				
+			}
+		});
+		
 		root.setCenter(midiDeviceTable);
 		root.setTop(topBox);
 		VBox bottomBox = new VBox();
@@ -147,7 +172,17 @@ public class MidiConfigWindow{
 		bottomBox.getChildren().add(buttonBox2);
 		bottomBox.getChildren().add(buttonBox1);
 		root.setBottom(bottomBox);
-		
+		cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent arg0) {
+				if(getMConfigShow()) {
+					midiStageShow=false;
+				}
+				if(isTesting()) {
+					getSelectedDevice().close();
+				}
+				midiConfigStage.close();
+			};
+		});
 		
 	}
 	
@@ -159,6 +194,24 @@ public class MidiConfigWindow{
 	}
 	public Stage getStage() {
 		return midiConfigStage;
+	}
+	private boolean isTesting() {
+		return isTesting;
+	}
+	private void setTesting(boolean isTesting) {
+		this.isTesting = isTesting;
+	}
+	private MidiDevice getSelectedDevice() {
+		return selectedDevice;
+	}
+	private void setSelectedDevice(MidiDevice selectedDevice) {
+		this.selectedDevice = selectedDevice;
+	}
+	private InfoWrapper getSelectedItem() {
+		return selectedItem;
+	}
+	private void setSelectedItem(InfoWrapper selectedItem) {
+		this.selectedItem = selectedItem;
 	}
 	private class ListenMidiTask extends TimerTask{
 		private MidiDevice myD;
