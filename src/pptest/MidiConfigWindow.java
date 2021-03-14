@@ -29,6 +29,7 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
 import javax.sound.midi.Transmitter;
+import javafx.scene.control.Alert.AlertType;
 
 import java.util.Date;
 import java.util.TimerTask;
@@ -114,52 +115,64 @@ public class MidiConfigWindow{
 		midiDeviceTable.getColumns().setAll(mDeviceNameCol,mDescCol);
 		
 		testButton.setOnAction(new EventHandler<ActionEvent>() {
-
 			@Override
 			public void handle(ActionEvent arg0) {
-				setSelectedItem(midiDeviceTable.getSelectionModel().getSelectedItem());
-				Info [] mList = MidiSystem.getMidiDeviceInfo();
-				for(Info i : mList) {
-					if(i.getName()==getSelectedItem().getMName()&&i.hashCode()==getSelectedItem().getMHash()) {
-						System.out.println("FOUND");
-						System.out.println("D/testButton Press: "+getSelectedItem().getMName()+"HASH: "+getSelectedItem().getMHash());
-						try {
-							setSelectedDevice(MidiSystem.getMidiDevice(i));
-							if(!isTesting()) {
-								
-								getSelectedDevice().open();
-								System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
-								selectedTransmitter = getSelectedDevice().getTransmitter();
-								ioMidiRec = new PracticeReceiver();
-								selectedTransmitter.setReceiver(ioMidiRec);
-								
-								setTesting(true);
-							}
-							else {
-								
-								getSelectedDevice().close();
-								System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
-								setTesting(false);
-							}
-								
+				try {
+					setSelectedItem(midiDeviceTable.getSelectionModel().getSelectedItem());
+					Info [] mList = MidiSystem.getMidiDeviceInfo();
+					for(Info i : mList) {
+						if(i.getName()==getSelectedItem().getMName()&&i.hashCode()==getSelectedItem().getMHash()) {
+							System.out.println("FOUND");
+							System.out.println("D/testButton Press: "+getSelectedItem().getMName()+"HASH: "+getSelectedItem().getMHash());
+							
+								setSelectedDevice(MidiSystem.getMidiDevice(i));
+								if(!isTesting()) {
+									getSelectedDevice().open();
+									System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
+									selectedTransmitter = getSelectedDevice().getTransmitter();
+									ioMidiRec = new PracticeReceiver();
+									selectedTransmitter.setReceiver(ioMidiRec);
+									setTesting(true);
+									break;
+								}
+								else {
+									getSelectedDevice().close();
+									System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
+									setTesting(false);
+								}
 						}
-						catch(Exception e){
-							e.printStackTrace();
-						}
-						break;
+					}
+				}catch(Exception e){
+					if(e.getClass().getCanonicalName()=="java.lang.NullPointerException") {
+						System.out.println("NO DEVICE SELECTED!!!");
+					}
+					else {
+						e.printStackTrace();
+						System.out.println(e.getClass().getCanonicalName());
 					}
 				}
-			}
-			
-		});
+			}});
 		
 		saveButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
 				try {
-					
+					if(!isTesting()) {
+						
+					}else {
+						getSelectedDevice().close();
+						System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
+						setTesting(false);
+						
+					}
+					if(getMConfigShow()) {
+						midiStageShow=false;
+					}
+					midiConfigStage.close();
 				}catch(Exception e) {
-					
+					if(e.getClass()==NullPointerException.class) {
+						System.out.println("No Device selected!!!!");
+					}
 				}
 				
 			}
@@ -179,6 +192,8 @@ public class MidiConfigWindow{
 				}
 				if(isTesting()) {
 					getSelectedDevice().close();
+					System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
+					setTesting(false);
 				}
 				midiConfigStage.close();
 			};
