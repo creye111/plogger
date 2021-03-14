@@ -7,7 +7,7 @@ public class PracticeReceiver implements Receiver{
 	private long lastNoteOnTime=-1;
 	private long firstNoteTime=-1;
 	private long elaspsedTime =-1;
-	private long delay=6000000;
+	private long delay=10000000;
 	public PracticeReceiver() {
 		
 	}
@@ -36,7 +36,7 @@ public class PracticeReceiver implements Receiver{
 		}
 		else {
 			if(lastNoteOnTime!=-1) {
-				if(timeStamp - lastNoteOnTime >10000000 ) {
+				if(timeStamp - lastNoteOnTime >delay ) {
 					elaspsedTime=lastNoteOnTime-firstNoteTime;
 					System.out.println("SessionEnd: "+elaspsedTime/1000000);
 					lastNoteOnTime =-1;

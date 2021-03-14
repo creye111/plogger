@@ -26,14 +26,13 @@ import javax.sound.midi.MidiDevice.Info;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Receiver;
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
 import javax.sound.midi.Transmitter;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Dialog;
 
 import java.util.Date;
 import java.util.TimerTask;
 import javax.sound.midi.Synthesizer;
+import javafx.scene.control.TextArea;
 public class MidiConfigWindow{
 	private Stage midiConfigStage;
 	private Scene midiConfigScene;
@@ -44,14 +43,16 @@ public class MidiConfigWindow{
 	private Receiver ioMidiRec;
 	private InfoWrapper selectedItem;
 	private MidiDevice selectedDevice;
-	
+	private String conOutput = "Testing Output:\n";
+	private TextArea con = new TextArea(conOutput);
+	private HBox deviceTestingBox = new HBox();
 	public MidiConfigWindow() {
 		// TODO Auto-generated constructor stub
 		midiConfigStage = new Stage();
 	}
 	public MidiConfigWindow(BorderPane root) {
 		midiConfigStage = new Stage();
-		midiConfigScene = new Scene(root,400.0,400.0);
+		midiConfigScene = new Scene(root,800.0,400.0);
 
 		midiConfigStage.setTitle("Midi Configuration");
 		midiConfigStage.setScene(midiConfigScene);
@@ -97,6 +98,9 @@ public class MidiConfigWindow{
 		//HBox.setMargin(refreshButton,new Insets(5, 10, 10, 30));
 		Rectangle r1 = new Rectangle(1200/3.0,1200/4.0,Color.BLACK);
 		
+		//TODO: Implement basic console box for debugging purposes when the testing button is pressed.
+		
+		
 		midiDeviceTable = new TableView<>();
 		Info[] iArr = MidiSystem.getMidiDeviceInfo();
 		
@@ -113,45 +117,8 @@ public class MidiConfigWindow{
 		TableColumn<InfoWrapper,String> mDescCol = new TableColumn("Description");
 		mDescCol.setCellValueFactory(new PropertyValueFactory<InfoWrapper,String>("mDesc"));
 		midiDeviceTable.getColumns().setAll(mDeviceNameCol,mDescCol);
+		midiDeviceTable.setPrefWidth(400);
 		
-		testButton.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent arg0) {
-				try {
-					setSelectedItem(midiDeviceTable.getSelectionModel().getSelectedItem());
-					Info [] mList = MidiSystem.getMidiDeviceInfo();
-					for(Info i : mList) {
-						if(i.getName()==getSelectedItem().getMName()&&i.hashCode()==getSelectedItem().getMHash()) {
-							System.out.println("FOUND");
-							System.out.println("D/testButton Press: "+getSelectedItem().getMName()+"HASH: "+getSelectedItem().getMHash());
-							
-								setSelectedDevice(MidiSystem.getMidiDevice(i));
-								if(!isTesting()) {
-									getSelectedDevice().open();
-									System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
-									selectedTransmitter = getSelectedDevice().getTransmitter();
-									ioMidiRec = new PracticeReceiver();
-									selectedTransmitter.setReceiver(ioMidiRec);
-									setTesting(true);
-									break;
-								}
-								else {
-									getSelectedDevice().close();
-									System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
-									setTesting(false);
-								}
-						}
-					}
-				}catch(Exception e){
-					if(e.getClass().getCanonicalName()=="java.lang.NullPointerException") {
-						System.out.println("NO DEVICE SELECTED!!!");
-					}
-					else {
-						e.printStackTrace();
-						System.out.println(e.getClass().getCanonicalName());
-					}
-				}
-			}});
 		
 		saveButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -172,15 +139,80 @@ public class MidiConfigWindow{
 				}catch(Exception e) {
 					if(e.getClass()==NullPointerException.class) {
 						System.out.println("No Device selected!!!!");
+						//TODO: Implement No Device Selected Dialog Alert
+//						Dialog<String> noDeviceDiag = new Dialog<String>();
+//						noDeviceDiag.setContentText("No Device Selected to Test!");
+//						noDeviceDiag.showAndWait();
+					}
+					else{
+						Dialog<String> excDiag = new Dialog<String>();
+						excDiag.setContentText(e.getStackTrace().toString());
 					}
 				}
 				
 			}
 		});
-		
-		root.setCenter(midiDeviceTable);
+		deviceTestingBox = new HBox();
+		deviceTestingBox.getChildren().add(midiDeviceTable);
+		con.setPrefSize(400, 400);
+		con.setStyle("-fx-font: 12 \"courier new\";");
+		deviceTestingBox.getChildren().add(con);
+		root.setCenter(deviceTestingBox);
 		root.setTop(topBox);
 		VBox bottomBox = new VBox();
+		
+		testButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				try {
+					setSelectedItem(midiDeviceTable.getSelectionModel().getSelectedItem());
+					Info [] mList = MidiSystem.getMidiDeviceInfo();
+					for(Info i : mList) {
+						if(i.getName()==getSelectedItem().getMName()&&i.hashCode()==getSelectedItem().getMHash()) {
+							System.out.println("FOUND");
+							
+							System.out.println("D/testButton Press: "+getSelectedItem().getMName()+"HASH: "+getSelectedItem().getMHash());
+							
+								setSelectedDevice(MidiSystem.getMidiDevice(i));
+								if(!isTesting()) {
+									
+									getSelectedDevice().open();
+									System.out.println("\nD/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
+									con.setText(con.getText() +"D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
+									selectedTransmitter = getSelectedDevice().getTransmitter();
+									ioMidiRec = new PracticeReceiver();
+									selectedTransmitter.setReceiver(ioMidiRec);
+									setTesting(true);
+									con.setText(con.getText()+"\n"+"Device Acquired . . . \n Beginning testing . . .");
+									break;
+								}
+								else {
+									getSelectedDevice().close();
+									System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
+									con.setText(con.getText()+"\n Stopping testing . . . .");
+									setTesting(false);
+								}
+						}
+					}
+				}catch(Exception e){
+					if(e.getClass().getCanonicalName()=="java.lang.NullPointerException") {
+						System.out.println("NO DEVICE SELECTED!!!");
+						HBox diagRoot = new HBox();
+						Stage noDevDiagStage = new Stage();
+						Scene noDDScene = new Scene(diagRoot,300,100);
+						Text noDDText = new Text("No Device Selected!\nPlease select a device to test!");
+						noDDText.setStyle("-fx-font: 20 arial;");
+						diagRoot.getChildren().add(noDDText);
+						noDevDiagStage.setScene(noDDScene);
+						noDevDiagStage.show();
+						
+					}
+					else {
+						e.printStackTrace();
+						System.out.println(e.getClass().getCanonicalName());
+					}
+				}
+			}});
 
 		bottomBox.getChildren().add(buttonBox2);
 		bottomBox.getChildren().add(buttonBox1);
