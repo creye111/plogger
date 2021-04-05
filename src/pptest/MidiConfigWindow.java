@@ -29,14 +29,21 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.Transmitter;
 import javafx.scene.control.Dialog;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.Date;
 import java.util.TimerTask;
 import javax.sound.midi.Synthesizer;
 import javafx.scene.control.TextArea;
+
 public class MidiConfigWindow{
 	private Stage midiConfigStage;
 	private Scene midiConfigScene;
 	private boolean isTesting=false;
+	/**
+	 * midiStageShow: boolean - allows for other windows to know the state of the window showing
+	 */
 	private static boolean midiStageShow = false;
 	private TableView <InfoWrapper> midiDeviceTable;
 	private  Transmitter selectedTransmitter;
@@ -46,6 +53,7 @@ public class MidiConfigWindow{
 	private String conOutput = "Testing Output:\n";
 	private TextArea con = new TextArea(conOutput);
 	private HBox deviceTestingBox = new HBox();
+	private String hashCode ="x";
 	public MidiConfigWindow() {
 		// TODO Auto-generated constructor stub
 		midiConfigStage = new Stage();
@@ -124,25 +132,40 @@ public class MidiConfigWindow{
 			@Override
 			public void handle(ActionEvent arg0) {
 				try {
+
+					hashCode = "hashcode: "+getSelectedDevice().getDeviceInfo().hashCode()+"";
 					if(!isTesting()) {
 						
 					}else {
+						//Close the device being tested.
 						getSelectedDevice().close();
 						System.out.println("D/MidiConfigWindow: selectedDevice isOpen:"+getSelectedDevice().isOpen());
 						setTesting(false);
 						
+						
+						
 					}
+					//TODO: Update the device information into config file.
+					File f= new File(System.getProperty("user.dir")+"/res/config.txt");
+					System.out.println(f.getAbsolutePath());
+					BufferedWriter writer = new BufferedWriter(new FileWriter(f.getAbsolutePath()));
+					writer.write(hashCode);
+					writer.newLine();
+					//writer.write("Name: "+getSelectedDevice().getDeviceInfo().getName());
+					writer.close();
+					System.out.println(System.getProperty("user.dir").toString());
 					if(getMConfigShow()) {
 						midiStageShow=false;
 					}
 					midiConfigStage.close();
 				}catch(Exception e) {
 					if(e.getClass()==NullPointerException.class) {
-						System.out.println("No Device selected!!!!");
+						e.printStackTrace();
 						//TODO: Implement No Device Selected Dialog Alert
 //						Dialog<String> noDeviceDiag = new Dialog<String>();
 //						noDeviceDiag.setContentText("No Device Selected to Test!");
 //						noDeviceDiag.showAndWait();
+						showNoDeviceDiag();
 					}
 					else{
 						Dialog<String> excDiag = new Dialog<String>();
@@ -152,6 +175,7 @@ public class MidiConfigWindow{
 				
 			}
 		});
+		//TODO: Find a way to get the selected device without having to press the testing button.
 		deviceTestingBox = new HBox();
 		deviceTestingBox.getChildren().add(midiDeviceTable);
 		con.setPrefSize(400, 400);
@@ -196,19 +220,12 @@ public class MidiConfigWindow{
 					}
 				}catch(Exception e){
 					if(e.getClass().getCanonicalName()=="java.lang.NullPointerException") {
-						System.out.println("NO DEVICE SELECTED!!!");
-						HBox diagRoot = new HBox();
-						Stage noDevDiagStage = new Stage();
-						Scene noDDScene = new Scene(diagRoot,300,100);
-						Text noDDText = new Text("No Device Selected!\nPlease select a device to test!");
-						noDDText.setStyle("-fx-font: 20 arial;");
-						diagRoot.getChildren().add(noDDText);
-						noDevDiagStage.setScene(noDDScene);
-						noDevDiagStage.show();
+						showNoDeviceDiag();
 						
 					}
 					else {
 						e.printStackTrace();
+						con.setText(con.getText()+"\n"+e.getMessage());
 						System.out.println(e.getClass().getCanonicalName());
 					}
 				}
@@ -271,6 +288,32 @@ public class MidiConfigWindow{
 			System.out.println("[" + new Date() + "] " + "uh" + ": task executed!");
 		}
 		
+	}
+	private void showNoDeviceDiag() {
+		System.out.println("NO DEVICE SELECTED!!!");
+		HBox diagRoot = new HBox();
+		Stage noDevDiagStage = new Stage();
+		Scene noDDScene = new Scene(diagRoot,300,100);
+		Text noDDText = new Text("No Device Selected!\nPlease select a device to test!");
+		noDDText.setStyle("-fx-font: 20 arial;");
+		diagRoot.getChildren().add(noDDText);
+		noDevDiagStage.setScene(noDDScene);
+		noDevDiagStage.show();
+	}
+	/**
+	 * Shows dialog with the s's message
+	 * @param message string that will be displayed as the message of the dialog
+	 */
+	private void showDeviceSetupDiag(String message) {
+		System.out.println(message);
+		HBox diagRoot = new HBox();
+		Stage noDevDiagStage = new Stage();
+		Scene noDDScene = new Scene(diagRoot,300,100);
+		Text noDDText = new Text(message);
+		noDDText.setStyle("-fx-font: 20 arial;");
+		diagRoot.getChildren().add(noDDText);
+		noDevDiagStage.setScene(noDDScene);
+		noDevDiagStage.show();
 	}
 	
 

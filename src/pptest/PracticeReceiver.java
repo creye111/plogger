@@ -39,6 +39,7 @@ public class PracticeReceiver implements Receiver{
 				if(timeStamp - lastNoteOnTime >delay ) {
 					elaspsedTime=lastNoteOnTime-firstNoteTime;
 					System.out.println("SessionEnd: "+elaspsedTime/1000000);
+					//TODO: Write session length to DB
 					lastNoteOnTime =-1;
 					firstNoteTime=-1;
 				}
