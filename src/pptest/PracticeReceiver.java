@@ -8,11 +8,15 @@ public class PracticeReceiver implements Receiver{
 	private long firstNoteTime=-1;
 	private long elaspsedTime =-1;
 	private long delay=10000000;
+	
 	public PracticeReceiver() {
 		
 	}
 	public PracticeReceiver(Receiver r) {
 	
+	}
+	public PracticeReceiver(int i) {
+		
 	}
 	@Override
 	public void send(MidiMessage message, long timeStamp) {

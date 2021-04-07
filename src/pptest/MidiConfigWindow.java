@@ -132,7 +132,7 @@ public class MidiConfigWindow{
 			@Override
 			public void handle(ActionEvent arg0) {
 				try {
-
+					//FIXME: hashcode is not unique to the device. need to use a different attribute to remember the device
 					hashCode = "hashcode: "+getSelectedDevice().getDeviceInfo().hashCode()+"";
 					if(!isTesting()) {
 						
@@ -195,7 +195,7 @@ public class MidiConfigWindow{
 						if(i.getName()==getSelectedItem().getMName()&&i.hashCode()==getSelectedItem().getMHash()) {
 							System.out.println("FOUND");
 							
-							System.out.println("D/testButton Press: "+getSelectedItem().getMName()+"HASH: "+getSelectedItem().getMHash());
+							System.out.println("D/testButton Press: "+getSelectedItem().getMName()+"HASH: "+getSelectedItem().getMHash()+"\t VENDOR: "+getSelectedItem().getMVender() + "\n \t DESC: "+getSelectedItem().getMDesc());
 							
 								setSelectedDevice(MidiSystem.getMidiDevice(i));
 								if(!isTesting()) {
