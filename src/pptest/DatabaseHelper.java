@@ -6,6 +6,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 
 public class DatabaseHelper {
 
@@ -82,16 +83,30 @@ public class DatabaseHelper {
 		}
 		return 0;
 	}
-	
-	private int insertSession(String date, String time, int duration) {
-		String qry="INSERT INTO session ( "+"("+SESSION_COL_1+","+SESSION_COL_2+","+SESSION_COL_3+")\n"+
-											"VALUES("+","+","+",";
-		try(Connection conn = DriverManager.getConnection(path)){
-			Statement s = conn.createStatement();
-			s.execute(qry);
+	/**
+	 * 
+	 * @param date
+	 * @param time
+	 * @param duration
+	 * @return
+	 */
+	public int insertSession(String date, String time, int duration) {
+		String qry="INSERT INTO session(date, time, duration) VALUES(?,?,?)";
+		try{
+			Connection conn = DriverManager.getConnection(path);
+			PreparedStatement ps = conn.prepareStatement(qry);
+			ps.setString(1,date);
+			ps.setString(2, time);
+			ps.setInt(3, duration);
+			ps.executeUpdate();
+			conn.close();
 		}catch(SQLException e) {
 			e.getMessage();
+			return 1;
 		}
+		return 0;
+	}
+	public int printSessionTableContents() {
 		return 0;
 	}
 	
