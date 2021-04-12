@@ -20,6 +20,7 @@ public class PracticeReceiver implements Receiver{
 	}
 	@Override
 	public void send(MidiMessage message, long timeStamp) {
+		DatabaseHelper x = new DatabaseHelper();
 		// TODO Auto-generated method stub
 		System.out.println(timeStamp + "|| L: "+message.getLength()+"S: "+message.getStatus()+" "+message.getMessage());
 		/**
@@ -43,7 +44,11 @@ public class PracticeReceiver implements Receiver{
 				if(timeStamp - lastNoteOnTime >delay ) {
 					elaspsedTime=lastNoteOnTime-firstNoteTime;
 					System.out.println("SessionEnd: "+elaspsedTime/1000000);
-					//TODO: Write session length to DB
+					String date=  LocalDateTime.now().toString();
+					String time = LocalDateTime.now().toString();
+					int duration = (int) elaspsedTime/1000000;
+					//Write session length to DB
+					x.insertSession(date, time, duration);
 					lastNoteOnTime =-1;
 					firstNoteTime=-1;
 				}
