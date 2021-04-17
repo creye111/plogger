@@ -7,7 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
-
+import java.sql.ResultSet;
 public class DatabaseHelper {
 
 	public String path = "jdbc:sqlite:"+System.getProperty("user.dir")+"\\res\\pplogger.db";
@@ -28,7 +28,7 @@ public class DatabaseHelper {
 		File dbFile = new File(System.getProperty("user.dir")+"/res/pplogger.db");
 		if(dbFile.exists()) {
 			Connection conn = null;
-			//TODO: Connect to existing SQLite DB
+			//Connect to existing SQLite DB
 			try {
 				conn = DriverManager.getConnection(path);
 				System.out.println("DB Exists! Connection established!");
@@ -44,9 +44,9 @@ public class DatabaseHelper {
 					e.getMessage();
 				}
 			}
-			
+			return 1;
 		}else {
-			//TODO: Create new SQLite DB
+			//Create new SQLite DB
 			try(Connection conn = DriverManager.getConnection(path)){
 				if(conn!= null) {
 					DatabaseMetaData meta = conn.getMetaData();
@@ -80,11 +80,23 @@ public class DatabaseHelper {
 				conn.close();
 		}catch(SQLException e) {
 			e.getMessage();
+			return 1;
 		}
 		return 0;
 	}
+	public Connection connect() {
+		Connection conn = null;
+		
+		try {
+			conn = DriverManager.getConnection(path);
+			
+		}catch(SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return conn;
+	}
 	/**
-	 * 
+	 * Method to connect to DB and insert a row into the session table.
 	 * @param date
 	 * @param time
 	 * @param duration
@@ -106,8 +118,24 @@ public class DatabaseHelper {
 		}
 		return 0;
 	}
-	public int printSessionTableContents() {
-		return 0;
+	/**
+	 * Prints all session Table contents
+	 * @return
+	 */
+	public void printSessionTableContents() {
+		String qry = "SELECT session_id, date, time, duration FROM session";
+		ResultSet copy=null;
+		try(Connection c = this.connect();
+			Statement selectStatement = c.createStatement();
+			ResultSet rs = selectStatement.executeQuery(qry)){
+			while (rs.next()) {
+				System.out.println(rs.getString("date")+" | "+ rs.getInt("duration"));
+			}
+			c.close();
+		}catch(SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		//return copy;
 	}
 	
 }

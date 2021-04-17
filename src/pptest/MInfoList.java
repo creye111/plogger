@@ -12,6 +12,11 @@ import javax.sound.midi.MidiSystem;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+/**
+ * List of wrappers for an observable list containing Info object from each connected Midi Device.
+ * @author creye111
+ *
+ */
 public class MInfoList implements ObservableList<InfoWrapper>{
 	private ArrayList <InfoWrapper>iList;
 	public MInfoList() {

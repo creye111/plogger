@@ -3,6 +3,11 @@ package pptest;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
 import java.time.LocalDateTime;
+/**
+ * 
+ * @author creye111
+ *
+ */
 public class PracticeReceiver implements Receiver{
 	private long lastNoteOnTime=-1;
 	private long firstNoteTime=-1;
