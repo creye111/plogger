@@ -25,7 +25,7 @@ public class PPLoggerMain extends  Application{
 	private double yDim=200.0;
 	private static boolean midiStageShow = false;
 	/**
-	 *
+	 *hello
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
