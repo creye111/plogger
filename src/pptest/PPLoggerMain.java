@@ -114,10 +114,8 @@ public class PPLoggerMain extends  Application{
 			public void handle(ActionEvent arg0) {
 				BorderPane sPane = new BorderPane();
 				PDFViewerWindow sWin = new PDFViewerWindow(sPane);
-				Stage sStage = new Stage();
-				sStage = sWin.getStage();
 				
-				sStage.show();
+				
 				
 			}
 		});
