@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.layout.BorderPane?>
+<BorderPane>
+	<top>
+		<VBox xmlns:fx="http://javafx.com/fxml/1">
+			<!-- TODO Add Nodes -->
+			<children>
+				<Text text="PDF VIEWER"/>
+			</children>
+			
+			
+			
+		</VBox>
+	</top>
+	<center>
+		<VBox xmlns:fx="http://javafx.com/fxml/1">
+			<!-- TODO Add Nodes -->
+			<children>
+				<Text text="PDF VIEWER"/>
+			</children>
+			
+			
+			
+		</VBox>
+	</center>
+</BorderPane>
+
